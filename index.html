@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District Police Range Kathmandu - Contact Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .category-active {
+            background-color: #1e40af;
+            color: white;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+        }
+        .contact-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .contact-modal {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-blue-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <img src="https://via.placeholder.com/50" alt="Police Logo" class="h-12 w-12">
+                    <div>
+                        <h1 class="text-2xl font-bold">District Police Range Kathmandu</h1>
+                        <p class="text-blue-200">Contact Management System</p>
+                    </div>
+                </div>
+                <div>
+                    <button id="addContactBtn" class="bg-white text-blue-800 px-4 py-2 rounded-lg font-medium hover:bg-blue-100 transition-all">
+                        <i class="fas fa-plus mr-2"></i>Add Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page active">
+            <!-- Search and Filter -->
+            <div class="mb-8 bg-white p-6 rounded-xl shadow-md">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="relative flex-grow">
+                        <input type="text" id="searchInput" placeholder="Search contacts..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div class="flex space-x-2">
+                        <select id="categoryFilter" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Filter by Category</option>
+                            <option value="dpr">DPR Kathmandu</option>
+                            <option value="subordinate">Subordinate Offices</option>
+                            <option value="other">Other Offices</option>
+                        </select>
+                        <select id="sectionFilter" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Filter by Section</option>
+                            <!-- Sections will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Navigation -->
+            <div class="mb-8 bg-white p-4 rounded-xl shadow-md">
+                <div class="flex flex-wrap gap-2">
+                    <button class="category-btn px-6 py-3 rounded-lg font-medium transition-all category-active" data-category="dpr">
+                        <i class="fas fa-building mr-2"></i>DPR Kathmandu
+                    </button>
+                    <button class="category-btn px-6 py-3 bg-white rounded-lg font-medium transition-all hover:bg-blue-50" data-category="subordinate">
+                        <i class="fas fa-shield-alt mr-2"></i>Subordinate Offices
+                    </button>
+                    <button class="category-btn px-6 py-3 bg-white rounded-lg font-medium transition-all hover:bg-blue-50" data-category="other">
+                        <i class="fas fa-sitemap mr-2"></i>Other Offices
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Content -->
+            <div id="categoryContent">
+                <!-- DPR Kathmandu Content -->
+                <div id="dprContent" class="tab-content active">
+                    <!-- Floor Navigation -->
+                    <div class="mb-8 overflow-x-auto">
+                        <div class="flex space-x-4 pb-2" id="floorButtonsContainer">
+                            <button class="floor-btn px-6 py-3 bg-white rounded-lg shadow-md transition-all hover:bg-blue-50" data-floor="basement">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>Basement
+                            </button>
+                            <button class="floor-btn px-6 py-3 bg-white rounded-lg shadow-md transition-all hover:bg-blue-50" data-floor="ground">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>Ground Floor
+                            </button>
+                            <button class="floor-btn px-6 py-3 bg-white rounded-lg shadow-md transition-all hover:bg-blue-50 floor-active" data-floor="first">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>1st Floor
+                            </button>
+                            <button class="floor-btn px-6 py-3 bg-white rounded-lg shadow-md transition-all hover:bg-blue-50" data-floor="second">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>2nd Floor
+                            </button>
+                            <button class="floor-btn px-6 py-3 bg-white rounded-lg shadow-md transition-all hover:bg-blue-50" data-floor="third">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>3rd Floor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Current Floor Sections -->
+                    <div id="floorSectionsContainer">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <i class="fas fa-layer-group mr-2 text-blue-600"></i>1st Floor Sections
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="sectionsGrid">
+                            <!-- Section Cards will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subordinate Offices Content -->
+                <div id="subordinateContent" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-shield-alt mr-2 text-blue-600"></i>Subordinate Offices
+                        </h2>
+                        <button id="addSubordinateBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
+                            <i class="fas fa-plus-circle mr-1"></i> Add Office
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="subordinateOfficesGrid">
+                        <!-- Subordinate offices will be dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Other Offices Content -->
+                <div id="otherContent" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-building mr-2 text-blue-600"></i>Other Offices
+                        </h2>
+                        <button id="addOtherOfficeBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
+                            <i class="fas fa-plus-circle mr-1"></i> Add Office
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="otherOfficesGrid">
+                        <!-- Other offices will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Contact Page -->
+        <div id="addContactPage" class="page">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden max-w-4xl mx-auto">
+                <div class="bg-blue-800 text-white px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold">
+                            <i class="fas fa-user-plus mr-2"></i>Add New Contact
+                        </h2>
+                        <button id="backToDashboard" class="text-white hover:text-blue-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <form id="contactForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="fullName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="designation" class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                                <input type="text" id="designation" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                <select id="category" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Select Category</option>
+                                    <option value="dpr">DPR Kathmandu</option>
+                                    <option value="subordinate">Subordinate Office</option>
+                                    <option value="other">Other Office</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department/Section</label>
+                                <select id="department" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Select Department</option>
+                                    <!-- Departments will be populated dynamically -->
+                                </select>
+                            </div>
+                            <div id="floorField">
+                                <label for="floor" class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                                <select id="floor" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Floor</option>
+                                    <option value="Basement">Basement</option>
+                                    <option value="Ground Floor">Ground Floor</option>
+                                    <option value="1st Floor">1st Floor</option>
+                                    <option value="2nd Floor">2nd Floor</option>
+                                    <option value="3rd Floor">3rd Floor</option>
+                                    <option value="4th Floor">4th Floor</option>
+                                    <option value="5th Floor">5th Floor</option>
+                                    <option value="6th Floor">6th Floor</option>
+                                    <option value="7th Floor">7th Floor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="officeNumber" class="block text-sm font-medium text-gray-700 mb-1">Office Number</label>
+                                <input type="text" id="officeNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="extension" class="block text-sm font-medium text-gray-700 mb-1">Extension</label>
+                                <input type="text" id="extension" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="mobile" class="block text-sm font-medium text-gray-70 mb-1">Mobile Number</label>
+                                <input type="tel" id="mobile" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                            <textarea id="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-end space-x-4">
+                            <button type="button" id="cancelContact" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                                <i class="fas fa-save mr-2"></i>Save Contact
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Subordinate Office Modal -->
+        <div id="addSubordinateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+                <div class="bg-blue-800 text-white px-6 py-4 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold">
+                            <i class="fas fa-plus-circle mr-2"></i>Add Subordinate Office
+                        </h3>
+                        <button id="closeSubordinateModal" class="text-white hover:text-blue-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form id="subordinateForm">
+                        <div class="mb-4">
+                            <label for="officeName" class="block text-sm font-medium text-gray-700 mb-1">Office Name</label>
+                            <input type="text" id="officeName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="officeDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="officeDescription" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-4 mt-6">
+                            <button type="button" id="cancelSubordinate" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                                Add Office
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Other Office Modal -->
+        <div id="addOtherOfficeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+                <div class="bg-blue-800 text-white px-6 py-4 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold">
+                            <i class="fas fa-plus-circle mr-2"></i>Add Other Office
+                        </h3>
+                        <button id="closeOtherOfficeModal" class="text-white hover:text-blue-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form id="otherOfficeForm">
+                        <div class="mb-4">
+                            <label for="otherOfficeName" class="block text-sm font-medium text-gray-700 mb-1">Office Name</label>
+                            <input type="text" id="otherOfficeName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="otherOfficeDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="otherOfficeDescription" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-4 mt-6">
+                            <button type="button" id="cancelOtherOffice" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                                Add Office
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Contacts Modal (Hidden by default) -->
+    <div id="contactsModal" class="modal-overlay hidden">
+        <div class="contact-modal">
+            <div class="bg-blue-800 text-white px-6 py-4 rounded-t-lg">
+                <div class="flex items-center justify-between">
+                    <h3 id="modalSectionTitle" class="text-xl font-bold"></h3>
+                    <button id="closeContactsModal" class="text-white hover:text-blue-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Contacts will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Contact Modal -->
+    <div id="editContactModal" class="modal-overlay hidden">
+        <div class="contact-modal">
+            <div class="bg-blue-800 text-white px-6 py-4 rounded-t-lg">
+                <div class="flex items-center justify-between">
+                    <h3 id="editModalTitle" class="text-xl font-bold">Edit Contact</h3>
+                    <button id="closeEditModal" class="text-white hover:text-blue-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="editContactForm">
+                    <input type="hidden" id="editContactId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="editFullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="editFullName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="editDesignation" class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                            <input type="text" id="editDesignation" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="editCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="editCategory" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Select Category</option>
+                                <option value="dpr">DPR Kathmandu</option>
+                                <option value="subordinate">Subordinate Office</option>
+                                <option value="other">Other Office</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="editDepartment" class="block text-sm font-medium text-gray-700 mb-1">Department/Section</label>
+                            <select id="editDepartment" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Select Department</option>
+                                <!-- Departments will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div id="editFloorField">
+                            <label for="editFloor" class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                            <select id="editFloor" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Floor</option>
+                                <option value="Basement">Basement</option>
+                                <option value="Ground Floor">Ground Floor</option>
+                                <option value="1st Floor">1st Floor</option>
+                                <option value="2nd Floor">2nd Floor</option>
+                                <option value="3rd Floor">3rd Floor</option>
+                                <option value="4th Floor">4th Floor</option>
+                                <option value="5th Floor">5th Floor</option>
+                                <option value="6th Floor">6th Floor</option>
+                                <option value="7th Floor">7th Floor</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="editOfficeNumber" class="block text-sm font-medium text-gray-700 mb-1">Office Number</label>
+                            <input type="text" id="editOfficeNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="editExtension" class="block text-sm font-medium text-gray-700 mb-1">Extension</label>
+                            <input type="text" id="editExtension" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="editMobile" class="block text-sm font-medium text-gray-70 mb-1">Mobile Number</label>
+                            <input type="tel" id="editMobile" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="editEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label for="editNotes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                        <textarea id="editNotes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end space-x-4">
+                        <button type="button" id="cancelEdit" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                            <i class="fas fa-save mr-2"></i>Update Contact
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (Mobile) -->
+    <button id="mobileAddContactBtn" class="floating-btn md:hidden bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-all">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 border-t mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-600">&copy; 2023 District Police Range Kathmandu. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-600 hover:text-blue-600"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-600 hover:text-blue-400"><i class="fab fa-twitter"></i></a>
+                    <div class="text-gray-600 hover:text-red-600"><i class="fab fa-youtube"></i></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data storage
+        let contacts = [];
+        let sections = {
+            dpr: {
+                basement: [],
+                ground: [],
+                first: [],
+                second: [],
+                third: []
+            },
+            subordinate: [],
+            other: []
+        };
+
+        // Initialize with sample data
+        function initializeSampleData() {
+            // Sample contacts
+            contacts = [
+                { id: 1, name: "John Smith", designation: "Chief Administrative Officer", category: "dpr", department: "Administration Section", floor: "1st Floor", office: "101", mobile: "9841000001", email: "john.smith@police.np", notes: "" },
+                { id: 2, name: "Sarah Johnson", designation: "Deputy Administrative Officer", category: "dpr", department: "Administration Section", floor: "1st Floor", office: "102", mobile: "9841000002", email: "sarah.j@police.np", notes: "" },
+                { id: 3, name: "Michael Brown", designation: "HR Manager", category: "dpr", department: "Administration Section", floor: "1st Floor", office: "103", mobile: "9841000003", email: "michael.b@police.np", notes: "" },
+                { id: 4, name: "David Miller", designation: "Operations Chief", category: "dpr", department: "Operations Section", floor: "1st Floor", office: "201", mobile: "9841000006", email: "david.m@police.np", notes: "" },
+                { id: 5, name: "Jennifer Taylor", designation: "Deputy Operations Chief", category: "dpr", department: "Operations Section", floor: "1st Floor", office: "202", mobile: "9841000007", email: "jennifer.t@police.np", notes: "" },
+                { id: 6, name: "Richard Jackson", designation: "CID Chief", category: "dpr", department: "CID Section", floor: "1st Floor", office: "301", mobile: "9841000010", email: "richard.j@police.np", notes: "" },
+                { id: 7, name: "Christopher Martin", designation: "Circle Inspector", category: "subordinate", department: "Metropolitan Police Circle", floor: "", office: "MPC-1", mobile: "9841000013", email: "chris.m@police.np", notes: "" },
+                { id: 8, name: "Andrew Clark", designation: "Traffic Chief", category: "subordinate", department: "Traffic Police Office", floor: "", office: "TP-1", mobile: "9841000016", email: "andrew.c@police.np", notes: "" },
+                { id: 9, name: "Brian Walker", designation: "Cyber Crime Chief", category: "subordinate", department: "Cyber Crime Unit", floor: "", office: "CC-1", mobile: "9841000019", email: "brian.w@police.np", notes: "" },
+                { id: 10, name: "Timothy Young", designation: "Section Chief", category: "other", department: "Children Search Section", floor: "", office: "CSS-1", mobile: "9841000021", email: "tim.y@police.np", notes: "" },
+                { id: 11, name: "Jason Hernandez", designation: "Verification Officer", category: "other", department: "Passport Verification", floor: "", office: "PV-1", mobile: "9841000023", email: "jason.h@police.np", notes: "" },
+                { id: 12, name: "Jeffrey Wright", designation: "K9 Unit Head", category: "other", department: "K9 Unit", floor: "", office: "K9-1", mobile: "9841000025", email: "jeffrey.w@police.np", notes: "" }
+            ];
+
+            // Sample sections
+            sections.dpr.basement = [
+                { name: "Storage Section", description: "Storage for equipment and documents", icon: "archive", color: "gray" },
+                { name: "Maintenance", description: "Building maintenance and repairs", icon: "tools", color: "blue" },
+                { name: "Parking Control", description: "Manages vehicle parking and security", icon: "parking", color: "green" }
+            ];
+
+            sections.dpr.ground = [
+                { name: "Reception", description: "Main reception and information desk", icon: "desktop", color: "blue" },
+                { name: "Public Relations", description: "Handles media and public inquiries", icon: "bullhorn", color: "purple" },
+                { name: "Complaint Section", description: "Receives and processes public complaints", icon: "comments", color: "red" }
+            ];
+
+            sections.dpr.first = [
+                { name: "Administration Section", description: "Handles all administrative tasks", icon: "user-shield", color: "red" },
+                { name: "Operations Section", description: "Coordinates field operations", icon: "tasks", color: "yellow" },
+                { name: "CID Section", description: "Criminal Investigation Department", icon: "fingerprint", color: "indigo" }
+            ];
+
+            sections.dpr.second = [
+                { name: "Traffic Management", description: "Manages traffic operations", icon: "traffic-light", color: "green" },
+                { name: "Records Section", description: "Maintains police records", icon: "archive", color: "teal" },
+                { name: "Training Section", description: "Officer training programs", icon: "graduation-cap", color: "blue" }
+            ];
+
+            sections.dpr.third = [
+                { name: "Women Cell", description: "Cases related to women and children", icon: "female", color: "pink" },
+                { name: "Juvenile Section", description: "Handles cases involving minors", icon: "child", color: "purple" },
+                { name: "Forensic Section", description: "Forensic analysis and evidence", icon: "microscope", color: "indigo" }
+            ];
+
+            sections.subordinate = [
+                { name: "Metropolitan Police Circle", description: "Responsible for local law enforcement in designated areas", icon: "shield-alt", color: "blue" },
+                { name: "Traffic Police Office", description: "Manages traffic flow and road safety in the district", icon: "traffic-light", color: "green" },
+                { name: "Cyber Crime Unit", description: "Investigates digital crimes and online fraud cases", icon: "laptop-code", color: "purple" }
+            ];
+
+            sections.other = [
+                { name: "Children Search Section", description: "Special unit for locating missing children", icon: "child", color: "pink" },
+                { name: "Passport Verification", description: "Handles all passport verification requests", icon: "passport", color: "teal" },
+                { name: "K9 Unit", description: "Police dog handling and training unit", icon: "dog", color: "orange" }
+            ];
+        }
+
+        // Initialize the app
+        function initApp() {
+            initializeSampleData();
+            renderAllSections();
+            updateDepartmentDropdowns();
+            updateSectionFilterDropdown();
+            
+            // Initialize with first floor data
+            document.querySelector('.floor-btn.floor-active').click();
+        }
+
+        // Render all sections
+        function renderAllSections() {
+            renderDPRSections('first');
+            renderSubordinateOffices();
+            renderOtherOffices();
+        }
+
+        // Render DPR sections for a specific floor
+        function renderDPRSections(floor) {
+            const sectionsGrid = document.getElementById('sectionsGrid');
+            sectionsGrid.innerHTML = '';
+            
+            const floorTitleMap = {
+                'basement': 'Basement Sections',
+                'ground': 'Ground Floor Sections',
+                'first': '1st Floor Sections',
+                'second': '2nd Floor Sections',
+                'third': '3rd Floor Sections'
+            };
+            
+            document.querySelector('#floorSectionsContainer h2').innerHTML = `
+                <i class="fas fa-layer-group mr-2 text-blue-600"></i>${floorTitleMap[floor]}
+            `;
+            
+            const colorMap = {
+                'red': 'bg-red-100 text-red-600',
+                'blue': 'bg-blue-100 text-blue-600',
+                'green': 'bg-green-100 text-green-600',
+                'yellow': 'bg-yellow-100 text-yellow-600',
+                'indigo': 'bg-indigo-100 text-indigo-600',
+                'purple': 'bg-purple-100 text-purple-600',
+                'pink': 'bg-pink-100 text-pink-600',
+                'teal': 'bg-teal-100 text-teal-600',
+                'gray': 'bg-gray-100 text-gray-600',
+                'orange': 'bg-orange-100 text-orange-600'
+            };
+            
+            sections.dpr[floor].forEach(section => {
+                const contactCount = contacts.filter(c => 
+                    c.category === 'dpr' && c.department === section.name
+                ).length;
+                
+                const sectionCard = document.createElement('div');
+                sectionCard.className = 'section-card bg-white p-6 rounded-xl shadow-md transition-all';
+                sectionCard.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="${colorMap[section.color]} p-3 rounded-full mr-4">
+                            <i class="fas fa-${section.icon} text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">${section.name}</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">${section.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500"><i class="fas fa-phone-alt mr-1"></i> ${contactCount} contacts</span>
+                        <button class="view-contacts-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-section="${section.name}">View All</button>
+                    </div>
+                `;
+                
+                sectionsGrid.appendChild(sectionCard);
+            });
+        }
+
+        // Render subordinate offices
+        function renderSubordinateOffices() {
+            const subordinateOfficesGrid = document.getElementById('subordinateOfficesGrid');
+            subordinateOfficesGrid.innerHTML = '';
+            
+            const colorMap = {
+                'blue': 'bg-blue-100 text-blue-600',
+                'green': 'bg-green-100 text-green-600',
+                'purple': 'bg-purple-100 text-purple-600'
+            };
+            
+            sections.subordinate.forEach(office => {
+                const contactCount = contacts.filter(c => 
+                    c.category === 'subordinate' && c.department === office.name
+                ).length;
+                
+                const officeCard = document.createElement('div');
+                officeCard.className = 'section-card bg-white p-6 rounded-xl shadow-md transition-all';
+                officeCard.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="${colorMap[office.color]} p-3 rounded-full mr-4">
+                            <i class="fas fa-${office.icon} text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">${office.name}</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">${office.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500"><i class="fas fa-phone-alt mr-1"></i> ${contactCount} contacts</span>
+                        <button class="view-contacts-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-section="${office.name}">View All</button>
+                    </div>
+                `;
+                
+                subordinateOfficesGrid.appendChild(officeCard);
+            });
+        }
+
+        // Render other offices
+        function renderOtherOffices() {
+            const otherOfficesGrid = document.getElementById('otherOfficesGrid');
+            otherOfficesGrid.innerHTML = '';
+            
+            const colorMap = {
+                'pink': 'bg-pink-100 text-pink-600',
+                'teal': 'bg-teal-100 text-teal-600',
+                'orange': 'bg-orange-100 text-orange-600'
+            };
+            
+            sections.other.forEach(office => {
+                const contactCount = contacts.filter(c => 
+                    c.category === 'other' && c.department === office.name
+                ).length;
+                
+                const officeCard = document.createElement('div');
+                officeCard.className = 'section-card bg-white p-6 rounded-xl shadow-md transition-all';
+                officeCard.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="${colorMap[office.color]} p-3 rounded-full mr-4">
+                            <i class="fas fa-${office.icon} text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">${office.name}</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">${office.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500"><i class="fas fa-phone-alt mr-1"></i> ${contactCount} contacts</span>
+                        <button class="view-contacts-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-section="${office.name}">View All</button>
+                    </div>
+                `;
+                
+                otherOfficesGrid.appendChild(officeCard);
+            });
+        }
+
+        // Update department dropdowns
+        function updateDepartmentDropdowns() {
+            const departmentDropdown = document.getElementById('department');
+            const editDepartmentDropdown = document.getElementById('editDepartment');
+            
+            // Clear existing options
+            departmentDropdown.innerHTML = '<option value="">Select Department</option>';
+            editDepartmentDropdown.innerHTML = '<option value="">Select Department</option>';
+            
+            // Add DPR sections
+            Object.values(sections.dpr).forEach(floorSections => {
+                floorSections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section.name;
+                    option.textContent = section.name;
+                    departmentDropdown.appendChild(option.cloneNode(true));
+                    editDepartmentDropdown.appendChild(option);
+                });
+            });
+            
+            // Add subordinate offices
+            sections.subordinate.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.name;
+                option.textContent = office.name;
+                departmentDropdown.appendChild(option.cloneNode(true));
+                editDepartmentDropdown.appendChild(option);
+            });
+            
+            // Add other offices
+            sections.other.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.name;
+                option.textContent = office.name;
+                departmentDropdown.appendChild(option.cloneNode(true));
+                editDepartmentDropdown.appendChild(option);
+            });
+        }
+
+        // Update section filter dropdown
+        function updateSectionFilterDropdown() {
+            const sectionFilter = document.getElementById('sectionFilter');
+            
+            // Clear existing options
+            sectionFilter.innerHTML = '<option value="">Filter by Section</option>';
+            
+            // Add DPR sections
+            Object.values(sections.dpr).forEach(floorSections => {
+                floorSections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section.name;
+                    option.textContent = section.name;
+                    sectionFilter.appendChild(option);
+                });
+            });
+            
+            // Add subordinate offices
+            sections.subordinate.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.name;
+                option.textContent = office.name;
+                sectionFilter.appendChild(option);
+            });
+            
+            // Add other offices
+            sections.other.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.name;
+                option.textContent = office.name;
+                sectionFilter.appendChild(option);
+            });
+        }
+
+        // Show contacts modal
+        function showContactsModal(sectionName) {
+            const modalTitle = document.getElementById('modalSectionTitle');
+            const tableBody = document.getElementById('contactsTableBody');
+            
+            // Set modal title
+            modalTitle.textContent = sectionName;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Get contacts for this section
+            const filteredContacts = contacts.filter(contact => contact.department === sectionName);
+            
+            // Add contacts to table
+            filteredContacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.designation}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.office}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.mobile}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="edit-contact-btn text-blue-600 hover:text-blue-800 mr-3" data-id="${contact.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-contact-btn text-red-600 hover:text-red-800" data-id="${contact.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Show modal
+            document.getElementById('contactsModal').classList.remove('hidden');
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    showEditContactModal(contactId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    deleteContact(contactId);
+                });
+            });
+        }
+
+        // Show edit contact modal
+        function showEditContactModal(contactId) {
+            const contact = contacts.find(c => c.id === contactId);
+            if (!contact) return;
+            
+            document.getElementById('editContactId').value = contact.id;
+            document.getElementById('editFullName').value = contact.name;
+            document.getElementById('editDesignation').value = contact.designation;
+            document.getElementById('editCategory').value = contact.category;
+            document.getElementById('editDepartment').value = contact.department;
+            document.getElementById('editFloor').value = contact.floor;
+            document.getElementById('editOfficeNumber').value = contact.office;
+            document.getElementById('editMobile').value = contact.mobile;
+            document.getElementById('editEmail').value = contact.email;
+            document.getElementById('editNotes').value = contact.notes;
+            
+            // Show/hide floor field based on category
+            const editFloorField = document.getElementById('editFloorField');
+            if (contact.category === 'dpr') {
+                editFloorField.style.display = 'block';
+            } else {
+                editFloorField.style.display = 'none';
+            }
+            
+            document.getElementById('contactsModal').classList.add('hidden');
+            document.getElementById('editContactModal').classList.remove('hidden');
+        }
+
+        // Add a new contact
+        function addContact(contactData) {
+            // Generate a new ID
+            const newId = contacts.length > 0 ? Math.max(...contacts.map(c => c.id)) + 1 : 1;
+            
+            const newContact = {
+                id: newId,
+                ...contactData
+            };
+            
+            contacts.push(newContact);
+            
+            // Update the UI
+            renderAllSections();
+            
+            // If the contacts modal is open for this department, refresh it
+            const currentSection = document.getElementById('modalSectionTitle').textContent;
+            if (currentSection === newContact.department) {
+                showContactsModal(newContact.department);
+            }
+        }
+
+        // Update a contact
+        function updateContact(contactId, updatedData) {
+            const index = contacts.findIndex(c => c.id === contactId);
+            if (index === -1) return;
+            
+            contacts[index] = {
+                ...contacts[index],
+                ...updatedData
+            };
+            
+            // Update the UI
+            renderAllSections();
+            
+            // If the contacts modal is open for this department, refresh it
+            const currentSection = document.getElementById('modalSectionTitle').textContent;
+            if (currentSection === updatedData.department) {
+                showContactsModal(updatedData.department);
+            }
+        }
+
+        // Delete a contact
+        function deleteContact(contactId) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+            
+            const index = contacts.findIndex(c => c.id === contactId);
+            if (index === -1) return;
+            
+            const deletedContact = contacts[index];
+            contacts.splice(index, 1);
+            
+            // Update the UI
+            renderAllSections();
+            
+            // If the contacts modal is open for this department, refresh it
+            const currentSection = document.getElementById('modalSectionTitle').textContent;
+            if (currentSection === deletedContact.department) {
+                showContactsModal(deletedContact.department);
+            }
+        }
+
+        // Add a new subordinate office
+        function addSubordinateOffice(officeData) {
+            const newOffice = {
+                name: officeData.name,
+                description: officeData.description,
+                icon: 'shield-alt',
+                color: 'blue'
+            };
+            
+            sections.subordinate.push(newOffice);
+            
+            // Update the UI
+            updateDepartmentDropdowns();
+            updateSectionFilterDropdown();
+            renderSubordinateOffices();
+        }
+
+        // Add a new other office
+        function addOtherOffice(officeData) {
+            const newOffice = {
+                name: officeData.name,
+                description: officeData.description,
+                icon: 'building',
+                color: 'teal'
+            };
+            
+            sections.other.push(newOffice);
+            
+            // Update the UI
+            updateDepartmentDropdowns();
+            updateSectionFilterDropdown();
+            renderOtherOffices();
+        }
+
+        // Search contacts
+        function searchContacts(query) {
+            if (!query) return;
+            
+            const filteredContacts = contacts.filter(contact => 
+                contact.name.toLowerCase().includes(query.toLowerCase()) ||
+                contact.designation.toLowerCase().includes(query.toLowerCase()) ||
+                contact.department.toLowerCase().includes(query.toLowerCase()) ||
+                contact.mobile.includes(query)
+            );
+            
+            const modalTitle = document.getElementById('modalSectionTitle');
+            const tableBody = document.getElementById('contactsTableBody');
+            
+            // Set modal title
+            modalTitle.textContent = `Search Results for "${query}"`;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add contacts to table
+            filteredContacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.designation}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.department}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.mobile}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="edit-contact-btn text-blue-600 hover:text-blue-800 mr-3" data-id="${contact.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-contact-btn text-red-600 hover:text-red-800" data-id="${contact.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Show modal
+            document.getElementById('contactsModal').classList.remove('hidden');
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    showEditContactModal(contactId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    deleteContact(contactId);
+                });
+            });
+        }
+
+        // Filter contacts by category and section
+        function filterContacts(category, section) {
+            let filteredContacts = [...contacts];
+            
+            if (category) {
+                filteredContacts = filteredContacts.filter(contact => contact.category === category);
+            }
+            
+            if (section) {
+                filteredContacts = filteredContacts.filter(contact => contact.department === section);
+            }
+            
+            const modalTitle = document.getElementById('modalSectionTitle');
+            const tableBody = document.getElementById('contactsTableBody');
+            
+            // Set modal title
+            let title = 'All Contacts';
+            if (category && section) {
+                title = `${section} (${category})`;
+            } else if (category) {
+                title = `${category} Contacts`;
+            } else if (section) {
+                title = `${section} Contacts`;
+            }
+            modalTitle.textContent = title;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add contacts to table
+            filteredContacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.designation}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.department}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.mobile}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${contact.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="edit-contact-btn text-blue-600 hover:text-blue-800 mr-3" data-id="${contact.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-contact-btn text-red-600 hover:text-red-800" data-id="${contact.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Show modal
+            document.getElementById('contactsModal').classList.remove('hidden');
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    showEditContactModal(contactId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-contact-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = parseInt(this.dataset.id);
+                    deleteContact(contactId);
+                });
+            });
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            
+            // Page Navigation
+            document.getElementById('addContactBtn').addEventListener('click', function() {
+                document.getElementById('dashboardPage').classList.remove('active');
+                document.getElementById('addContactPage').classList.add('active');
+            });
+
+            document.getElementById('mobileAddContactBtn').addEventListener('click', function() {
+                document.getElementById('dashboardPage').classList.remove('active');
+                document.getElementById('addContactPage').classList.add('active');
+            });
+
+            document.getElementById('backToDashboard').addEventListener('click', function() {
+                document.getElementById('addContactPage').classList.remove('active');
+                document.getElementById('dashboardPage').classList.add('active');
+            });
+
+            document.getElementById('cancelContact').addEventListener('click', function() {
+                document.getElementById('addContactPage').classList.remove('active');
+                document.getElementById('dashboardPage').classList.add('active');
+            });
+
+            // Modal Navigation
+            document.getElementById('addSubordinateBtn').addEventListener('click', function() {
+                document.getElementById('addSubordinateModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeSubordinateModal').addEventListener('click', function() {
+                document.getElementById('addSubordinateModal').classList.add('hidden');
+            });
+
+            document.getElementById('cancelSubordinate').addEventListener('click', function() {
+                document.getElementById('addSubordinateModal').classList.add('hidden');
+            });
+
+            document.getElementById('addOtherOfficeBtn').addEventListener('click', function() {
+                document.getElementById('addOtherOfficeModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeOtherOfficeModal').addEventListener('click', function() {
+                document.getElementById('addOtherOfficeModal').classList.add('hidden');
+            });
+
+            document.getElementById('cancelOtherOffice').addEventListener('click', function() {
+                document.getElementById('addOtherOfficeModal').classList.add('hidden');
+            });
+
+            // Contacts Modal
+            document.getElementById('closeContactsModal').addEventListener('click', function() {
+                document.getElementById('contactsModal').classList.add('hidden');
+            });
+
+            // Edit Contact Modal
+            document.getElementById('closeEditModal').addEventListener('click', function() {
+                document.getElementById('editContactModal').classList.add('hidden');
+                document.getElementById('contactsModal').classList.remove('hidden');
+            });
+
+            document.getElementById('cancelEdit').addEventListener('click', function() {
+                document.getElementById('editContactModal').classList.add('hidden');
+                document.getElementById('contactsModal').classList.remove('hidden');
+            });
+
+            // View Contacts Functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('view-contacts-btn') || 
+                    e.target.closest('.view-contacts-btn')) {
+                    const btn = e.target.classList.contains('view-contacts-btn') ? 
+                        e.target : e.target.closest('.view-contacts-btn');
+                    const sectionName = btn.dataset.section;
+                    showContactsModal(sectionName);
+                }
+            });
+
+            // Category Navigation
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    categoryButtons.forEach(btn => {
+                        btn.classList.remove('category-active', 'bg-blue-800', 'text-white');
+                        btn.classList.add('bg-white', 'text-blue-600', 'hover:bg-blue-50');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.remove('bg-white', 'text-blue-600', 'hover:bg-blue-50');
+                    this.classList.add('category-active', 'bg-blue-800', 'text-white');
+                    
+                    // Get the category
+                    const category = this.dataset.category;
+                    
+                    // Hide all tab contents
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    // Show the selected tab content
+                    document.getElementById(`${category}Content`).classList.add('active');
+                });
+            });
+
+            // Floor Navigation
+            const floorButtons = document.querySelectorAll('.floor-btn');
+            
+            floorButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    floorButtons.forEach(btn => {
+                        btn.classList.remove('floor-active', 'bg-blue-800', 'text-white');
+                        btn.classList.add('bg-white', 'text-blue-600', 'hover:bg-blue-50');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.remove('bg-white', 'text-blue-600', 'hover:bg-blue-50');
+                    this.classList.add('floor-active', 'bg-blue-800', 'text-white');
+                    
+                    // Get the floor data
+                    const floor = this.dataset.floor;
+                    renderDPRSections(floor);
+                });
+            });
+
+            // Show/hide floor field based on category selection
+            document.getElementById('category').addEventListener('change', function() {
+                const floorField = document.getElementById('floorField');
+                if (this.value === 'dpr') {
+                    floorField.style.display = 'block';
+                } else {
+                    floorField.style.display = 'none';
+                }
+            });
+
+            document.getElementById('editCategory').addEventListener('change', function() {
+                const editFloorField = document.getElementById('editFloorField');
+                if (this.value === 'dpr') {
+                    editFloorField.style.display = 'block';
+                } else {
+                    editFloorField.style.display = 'none';
+                }
+            });
+
+            // Form Submissions
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const contactData = {
+                    name: document.getElementById('fullName').value,
+                    designation: document.getElementById('designation').value,
+                    category: document.getElementById('category').value,
+                    department: document.getElementById('department').value,
+                    floor: document.getElementById('floor').value,
+                    office: document.getElementById('officeNumber').value,
+                    mobile: document.getElementById('mobile').value,
+                    email: document.getElementById('email').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                addContact(contactData);
+                
+                alert('Contact added successfully!');
+                this.reset();
+                document.getElementById('addContactPage').classList.remove('active');
+                document.getElementById('dashboardPage').classList.add('active');
+            });
+
+            document.getElementById('subordinateForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const officeData = {
+                    name: document.getElementById('officeName').value,
+                    description: document.getElementById('officeDescription').value
+                };
+                
+                addSubordinateOffice(officeData);
+                
+                alert(`Subordinate office "${officeData.name}" added successfully!`);
+                this.reset();
+                document.getElementById('addSubordinateModal').classList.add('hidden');
+            });
+
+            document.getElementById('otherOfficeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const officeData = {
+                    name: document.getElementById('otherOfficeName').value,
+                    description: document.getElementById('otherOfficeDescription').value
+                };
+                
+                addOtherOffice(officeData);
+                
+                alert(`Other office "${officeData.name}" added successfully!`);
+                this.reset();
+                document.getElementById('addOtherOfficeModal').classList.add('hidden');
+            });
+
+            document.getElementById('editContactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const contactId = parseInt(document.getElementById('editContactId').value);
+                const updatedData = {
+                    name: document.getElementById('editFullName').value,
+                    designation: document.getElementById('editDesignation').value,
+                    category: document.getElementById('editCategory').value,
+                    department: document.getElementById('editDepartment').value,
+                    floor: document.getElementById('editFloor').value,
+                    office: document.getElementById('editOfficeNumber').value,
+                    mobile: document.getElementById('editMobile').value,
+                    email: document.getElementById('editEmail').value,
+                    notes: document.getElementById('editNotes').value
+                };
+                
+                updateContact(contactId, updatedData);
+                
+                alert('Contact updated successfully!');
+                document.getElementById('editContactModal').classList.add('hidden');
+                document.getElementById('contactsModal').classList.remove('hidden');
+            });
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchContacts(this.value);
+                    this.value = '';
+                }
+            });
+
+            // Filter functionality
+            document.getElementById('categoryFilter').addEventListener('change', function() {
+                const category = this.value;
+                const section = document.getElementById('sectionFilter').value;
+                filterContacts(category, section);
+            });
+
+            document.getElementById('sectionFilter').addEventListener('change', function() {
+                const section = this.value;
+                const category = document.getElementById('categoryFilter').value;
+                filterContacts(category, section);
+            });
+        });
+    </script>
+</body>
+</html>
